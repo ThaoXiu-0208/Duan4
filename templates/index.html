@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Avatar Generator</h1>
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" required>
+            <button type="submit">Upload</button>
+        </form>
+        <div id="result" class="result">
+            <!-- Avatar and feature data will be displayed here -->
+        </div>
+    </div>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.avatar_url) {
+                    document.getElementById('result').innerHTML = `
+                        <h2>Generated Avatar</h2>
+                        <img src="${data.avatar_url}" alt="Avatar">
+                        <h3>Feature Data</h3>
+                        <pre>${JSON.stringify(data.feature_data, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <p>${data.error}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML = `
+                    <p>Error: ${error.message}</p>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
